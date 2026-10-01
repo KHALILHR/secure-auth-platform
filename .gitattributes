@@ -1,0 +1,3 @@
+# Scripts bash toujours en fins de ligne Unix (sinon erreur "\r" sous Windows)
+*.sh   text eol=lf
+*.conf text eol=lf

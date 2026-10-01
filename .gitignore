@@ -1,0 +1,11 @@
+# Secrets et matériel cryptographique
+.env
+pki/
+nginx/certs/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.qodo/
+.pytest_cache/

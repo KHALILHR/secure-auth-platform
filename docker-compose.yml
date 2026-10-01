@@ -1,0 +1,79 @@
+# SecureAuth — infrastructure (semaine 1)
+# Seul Nginx est exposé sur la machine hôte. L'app, MariaDB et Redis restent internes.
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"     # redirige vers HTTPS
+      - "443:443"   # seul point d'entrée réel
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [frontend]
+    restart: unless-stopped
+
+  app:
+    build: ./app
+    # On ne passe QUE ce dont l'app a besoin (le mot de passe root de la BDD n'y entre jamais)
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?charset=utf8mb4
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      HMAC_KEY: ${HMAC_KEY}
+    expose:
+      - "8000"      # visible des autres conteneurs, PAS de la machine hôte
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [frontend, backend]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}          # compte applicatif limité à la base ${DB_NAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [backend]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [backend]
+    restart: unless-stopped
+
+networks:
+  frontend: {}
+  backend:
+    internal: true    # pas d'accès Internet pour la BDD et Redis
+
+volumes:
+  db_data: {}
