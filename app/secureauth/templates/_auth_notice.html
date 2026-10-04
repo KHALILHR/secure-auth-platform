@@ -1,0 +1,19 @@
+{# Panneau d'avertissement commun aux pages de connexion et d'inscription #}
+<section class="notice-panel">
+  <img class="seal" src="{{ url_for('static', filename='img/seal.svg') }}" alt="Sceau SecureAuth">
+  <span class="section-label">Portail d'accès sécurisé</span>
+  <h1>Coffre-fort de documents classifiés</h1>
+  <p class="muted">
+    Accès soumis à authentification. La lecture d'un document exige une habilitation
+    suffisante <em>et</em> une inscription sur sa liste d'accès (besoin d'en connaître).
+  </p>
+  <div class="legal-notice">
+    <strong>AVERTISSEMENT</strong>
+    Vous accédez à un système d'information à accès restreint, réservé aux personnes autorisées.
+    <ul>
+      <li>Toute action est enregistrée dans un journal d'audit infalsifiable.</li>
+      <li>Tout accès ou tentative d'accès non autorisé est interdit et tracé.</li>
+      <li>L'utilisation de ce système vaut acceptation de ces contrôles.</li>
+    </ul>
+  </div>
+</section>

@@ -4,18 +4,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}SecureAuth{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/seal.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body>
+  {# Bandeau de classification : une page qui affiche un document classifié remplace
+     les blocs banner / banner_class par le niveau du document (semaine 3). #}
+  <div class="classification-banner {% block banner_class %}{% endblock %}">{% block banner %}Système à accès restreint — usage autorisé uniquement{% endblock %}</div>
+
   <header class="topbar">
-    <a href="{{ url_for('core.index') }}">SecureAuth</a>
+    <a class="brand" href="{{ url_for('core.index') }}">
+      <img src="{{ url_for('static', filename='img/seal.svg') }}" alt="">
+      <span>
+        <span class="brand-name">SECUREAUTH</span>
+        <span class="brand-sub">Système de gestion des documents classifiés</span>
+      </span>
+    </a>
     <nav>
       {% if g.user %}
-        <span>{{ g.user.username }} · habilitation {{ g.user.clearance_level }}</span>
+        <span class="user-chip">
+          <span class="mono">{{ g.user.username }}</span>
+          {% if g.user.role == "admin" %}<span class="role-tag">Admin</span>{% endif %}
+          <span class="badge-classification level-{{ g.user.clearance_level }}">{{ classification_labels[g.user.clearance_level] }}</span>
+        </span>
+        <a href="{{ url_for('auth.password') }}">Mot de passe</a>
         <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit">Déconnexion</button>
         </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Connexion</a>
+        <a href="{{ url_for('auth.register') }}">Inscription</a>
       {% endif %}
     </nav>
   </header>
@@ -23,11 +42,17 @@
   <main>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
-        <div class="flash flash-{{ category }}">{{ message }}</div>
+        <div class="flash flash-{{ category }}" role="alert">{{ message }}</div>
       {% endfor %}
     {% endwith %}
 
     {% block content %}{% endblock %}
   </main>
+
+  <footer class="site-footer">
+    Toute activité sur ce système est enregistrée dans un journal d'audit signé (HMAC-SHA256).
+    Les documents sont chiffrés en AES-256-GCM.
+  </footer>
+  <div class="classification-banner {{ self.banner_class() }}">{{ self.banner() }}</div>
 </body>
 </html>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Inscription — SecureAuth{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  {% include "_auth_notice.html" %}
+
+  <div class="card auth-card">
+    <span class="section-label">Nouvel agent</span>
+    <h2>Demande d'accès</h2>
+    <p class="muted">Le compte est créé au niveau PUBLIC. Seul un administrateur peut élever une habilitation.</p>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ field(form.username, "username") }}
+      {{ field(form.email, "email") }}
+      {{ field(form.password, "new-password") }}
+      <span class="muted">12 à 128 caractères, différent du nom d'utilisateur. Une phrase de plusieurs mots est idéale.</span>
+      {{ field(form.confirm, "new-password") }}
+      <button type="submit">Créer le compte</button>
+    </form>
+    <div class="card-footer muted">
+      Déjà inscrit ? <a href="{{ url_for('auth.login') }}">Se connecter</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

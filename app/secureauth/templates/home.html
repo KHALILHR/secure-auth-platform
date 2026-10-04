@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Tableau de bord</span>
+<h1>Bienvenue, {{ g.user.username }}</h1>
+
+<div class="dashboard">
+  <section class="card">
+    <span class="section-label">Carte d'agent</span>
+    <div class="id-card">
+      <img src="{{ url_for('static', filename='img/seal.svg') }}" alt="">
+      <dl>
+        <dt>Identifiant</dt><dd class="mono">{{ g.user.username }}</dd>
+        <dt>Rôle</dt><dd>{{ "Administrateur" if g.user.role == "admin" else "Agent" }}</dd>
+        <dt>Habilitation</dt>
+        <dd><span class="badge-classification level-{{ g.user.clearance_level }}">{{ classification_labels[g.user.clearance_level] }}</span></dd>
+        <dt>Statut</dt><dd>{{ "Actif" if g.user.is_active else "Désactivé" }}</dd>
+      </dl>
+    </div>
+    {% if g.user.role == "admin" %}
+      <p class="muted">En tant qu'administrateur, vous gérez les comptes et les habilitations, mais votre rôle ne vous donne accès à aucun document.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <span class="section-label">Niveaux de classification</span>
+    <ul class="levels">
+      {% for level, label in classification_labels.items() %}
+        <li>
+          <span class="badge-classification level-{{ level }}">{{ label }}</span>
+          {% if level <= g.user.clearance_level %}
+            <span class="state granted">HABILITÉ</span>
+          {% else %}
+            <span class="state denied">NON HABILITÉ</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="muted">L'habilitation ne suffit pas : chaque document exige aussi d'être sur sa liste d'accès. L'espace documents arrive en semaine 3.</p>
+  </section>
+</div>
+{% endblock %}

@@ -26,13 +26,14 @@ def create_app(config_overrides: dict | None = None) -> Flask:
 
     from . import models  # noqa: F401  (enregistre les tables)
     from .auth.routes import bp as auth_bp
-    from .cli import init_db_command, verify_audit_command
+    from .cli import create_admin_command, init_db_command, verify_audit_command
     from .routes import bp as core_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp)
     app.cli.add_command(init_db_command)
     app.cli.add_command(verify_audit_command)
+    app.cli.add_command(create_admin_command)
 
     @app.before_request
     def load_logged_in_user():
@@ -62,6 +63,12 @@ def create_app(config_overrides: dict | None = None) -> Flask:
             return
 
         g.user = user
+
+    @app.context_processor
+    def inject_classification_labels():
+        from .models import CLASSIFICATION_LABELS
+
+        return {"classification_labels": CLASSIFICATION_LABELS}
 
     @app.errorhandler(403)
     def forbidden(_error):

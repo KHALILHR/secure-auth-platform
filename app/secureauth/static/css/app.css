@@ -1,111 +1,354 @@
-/* Aucun style inline nulle part : la CSP (nginx.conf) interdit "unsafe-inline". */
+/* =============================================================================
+   SecureAuth — thème « système classifié »
+   Aucun style inline nulle part : la CSP (nginx.conf) interdit "unsafe-inline".
+   Polices système uniquement : la CSP (default-src 'self') bloque Google Fonts.
+   ============================================================================= */
 
 :root {
-  --color-bg: #0f1419;
-  --color-surface: #1a2029;
-  --color-border: #2c3542;
-  --color-text: #e6e9ec;
-  --color-muted: #8a93a1;
-  --color-accent: #4f8cff;
+  --bg: #0b1120;
+  --surface: #111a2e;
+  --surface-2: #16213a;
+  --border: #24324f;
+  --border-strong: #34476d;
+  --text: #e5e9f0;
+  --muted: #8b97ad;
+  --gold: #c9a227;
+  --gold-light: #e3c35a;
+  --accent: #3b82f6;
+  --danger: #ef4444;
+  --success: #22c55e;
 
-  /* Un niveau de classification = une couleur reconnaissable au premier coup d'œil */
-  --level-0: #3a7d44;   /* PUBLIC */
-  --level-1: #2f6fa8;   /* CONFIDENTIEL */
-  --level-2: #b8860b;   /* SECRET */
-  --level-3: #a83232;   /* TRÈS SECRET */
+  /* Couleurs conventionnelles des marquages de classification */
+  --level-0: #2e7d32;   /* PUBLIC        : vert   */
+  --level-1: #1d4ed8;   /* CONFIDENTIEL  : bleu   */
+  --level-2: #b91c1c;   /* SECRET        : rouge  */
+  --level-3: #f08c00;   /* TRÈS SECRET   : orange */
+
+  --font: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Mono", Consolas, "Liberation Mono", "Courier New", monospace;
+  --radius: 6px;
 }
 
 * { box-sizing: border-box; }
 
+html, body { height: 100%; }
+
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, rgba(59, 130, 246, 0.08), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
 }
 
+a { color: var(--gold-light); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.mono { font-family: var(--mono); letter-spacing: 0.02em; }
+
+/* ---- Bandeaux de classification (haut et bas de chaque page) ------------------ */
+.classification-banner {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 0.3rem 1rem;
+  text-transform: uppercase;
+  background: #1f2937;
+  color: #e5e7eb;
+}
+.classification-banner.level-0 { background: var(--level-0); color: #fff; }
+.classification-banner.level-1 { background: var(--level-1); color: #fff; }
+.classification-banner.level-2 { background: var(--level-2); color: #fff; }
+.classification-banner.level-3 { background: var(--level-3); color: #111; }
+
+/* ---- En-tête ---------------------------------------------------------------------- */
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(180deg, #0f172a, var(--surface));
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(201, 162, 39, 0.25);
 }
 
-.topbar a { color: var(--color-text); text-decoration: none; font-weight: 600; }
-.topbar nav { display: flex; align-items: center; gap: 1rem; }
+.brand { display: flex; align-items: center; gap: 0.8rem; color: var(--text); }
+.brand:hover { text-decoration: none; }
+.brand img { width: 44px; height: 44px; }
+.brand-name {
+  display: block;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  font-size: 1.05rem;
+}
+.brand-sub {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 
-/* Formulaire de déconnexion dans la barre : remplace l'ancien style inline */
-.inline-form { display: inline; max-width: none; }
+.topbar nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.topbar nav a { color: var(--text); font-size: 0.9rem; }
 
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+.user-chip .mono { color: var(--text); }
+
+.role-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+}
+
+/* ---- Contenu ------------------------------------------------------------------------ */
 main {
-  max-width: 960px;
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 1.25rem;
+}
+
+h1, h2, h3 { margin-top: 0; line-height: 1.25; }
+h1 { font-size: 1.5rem; letter-spacing: 0.02em; }
+h2 { font-size: 1.1rem; }
+
+.section-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.35rem;
 }
 
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
+.muted { color: var(--muted); font-size: 0.9rem; }
+
+/* ---- Messages ---------------------------------------------------------------------- */
 .flash {
   padding: 0.75rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius);
   margin-bottom: 1rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  background: var(--surface);
 }
-.flash-error { border-color: var(--level-3); color: #ffb4b4; }
-.flash-success { border-color: var(--level-0); color: #b7e4b0; }
+.flash-error { border-left-color: var(--danger); color: #fecaca; }
+.flash-success { border-left-color: var(--success); color: #bbf7d0; }
 
-/* Bandeau de classification : affiché sur chaque carte de document */
+/* ---- Marquage de classification (pastille) ------------------------------------------ */
 .badge-classification {
   display: inline-block;
   padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
   color: #fff;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 .badge-classification.level-0 { background: var(--level-0); }
 .badge-classification.level-1 { background: var(--level-1); }
 .badge-classification.level-2 { background: var(--level-2); }
-.badge-classification.level-3 { background: var(--level-3); }
+.badge-classification.level-3 { background: var(--level-3); color: #111; }
 
-form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 420px; }
+/* ---- Formulaires ---------------------------------------------------------------------- */
+form { display: flex; flex-direction: column; gap: 0.6rem; }
 
-label { font-size: 0.85rem; color: var(--color-muted); }
+label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
 
 input, select, textarea {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  border-radius: 6px;
-  padding: 0.5rem 0.65rem;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.75rem;
   font-size: 1rem;
+  font-family: var(--font);
 }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.2);
+}
+
+.field-error { color: #fca5a5; font-size: 0.82rem; }
 
 button {
-  background: var(--color-accent);
-  color: #fff;
+  margin-top: 0.6rem;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  color: #111;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
   border: none;
-  border-radius: 6px;
-  padding: 0.6rem 1rem;
-  font-size: 1rem;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.2rem;
   cursor: pointer;
-  width: fit-content;
 }
-button:hover { opacity: 0.9; }
+button:hover { filter: brightness(1.07); }
+button:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
 
-.error-page {
-  text-align: center;
-  padding: 4rem 1rem;
+/* Bouton discret (déconnexion dans la barre) */
+.inline-form { display: inline; }
+.inline-form button,
+.btn-ghost {
+  margin: 0;
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.72rem;
 }
-.error-page h1 { font-size: 3rem; margin-bottom: 0.5rem; }
+.inline-form button:hover { border-color: var(--danger); color: #fecaca; filter: none; }
+
+/* ---- Pages d'authentification : avertissement + formulaire ------------------------------ */
+.auth-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.notice-panel { padding: 1rem 0.5rem; }
+.notice-panel .seal { width: 120px; height: 120px; margin-bottom: 1.2rem; }
+.notice-panel h1 { font-size: 1.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.legal-notice {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--level-3);
+  background: rgba(240, 140, 0, 0.06);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+.legal-notice strong {
+  display: block;
+  font-family: var(--mono);
+  letter-spacing: 0.15em;
+  color: var(--level-3);
+  margin-bottom: 0.4rem;
+}
+.legal-notice ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+.legal-notice li { margin-bottom: 0.25rem; }
+
+.auth-card { max-width: 440px; width: 100%; justify-self: end; }
+.auth-card .card-footer {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ---- Accueil : carte d'habilitation ----------------------------------------------------- */
+.dashboard { display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.25rem; }
+
+.id-card { display: flex; gap: 1.2rem; align-items: center; }
+.id-card img { width: 72px; height: 72px; flex-shrink: 0; }
+.id-card dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+.id-card dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  align-self: center;
+}
+.id-card dd { margin: 0; }
+
+.levels { list-style: none; margin: 0; padding: 0; }
+.levels li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.levels li:last-child { border-bottom: none; }
+.levels .state { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; }
+.levels .granted { color: var(--success); }
+.levels .denied { color: var(--muted); }
+
+/* ---- Pages d'erreur ---------------------------------------------------------------------- */
+.error-page { text-align: center; padding: 3rem 1rem; }
+.error-page .code {
+  font-family: var(--mono);
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+/* ---- Pied de page ------------------------------------------------------------------------- */
+.site-footer {
+  padding: 0.9rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Mobile ---------------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .auth-layout, .dashboard { grid-template-columns: 1fr; }
+  .auth-card { justify-self: stretch; max-width: none; }
+  .notice-panel .seal { width: 84px; height: 84px; }
+  .brand-sub { display: none; }
+  main { padding: 1.25rem 1rem; }
+}

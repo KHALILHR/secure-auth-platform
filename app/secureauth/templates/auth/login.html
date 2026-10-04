@@ -1,8 +1,22 @@
 {% extends "base.html" %}
+{% from "_macros.html" import field %}
 {% block title %}Connexion — SecureAuth{% endblock %}
 {% block content %}
-<div class="card">
-  <h1>Connexion</h1>
-  <p>Le formulaire de connexion arrive à l'étape suivante du plan.</p>
+<div class="auth-layout">
+  {% include "_auth_notice.html" %}
+
+  <div class="card auth-card">
+    <span class="section-label">Identification</span>
+    <h2>Connexion</h2>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ field(form.identifier, "username") }}
+      {{ field(form.password, "current-password") }}
+      <button type="submit">Accéder au système</button>
+    </form>
+    <div class="card-footer muted">
+      Pas encore de compte ? <a href="{{ url_for('auth.register') }}">Demander un accès</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

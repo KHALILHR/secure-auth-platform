@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, g, jsonify, redirect, render_template, url_for
 from sqlalchemy import text
 
 from .extensions import db
@@ -8,13 +8,10 @@ bp = Blueprint("core", __name__)
 
 @bp.get("/")
 def index():
-    return (
-        "<!doctype html><html lang='fr'><head><meta charset='utf-8'>"
-        "<title>SecureAuth</title></head><body>"
-        "<h1>SecureAuth : infrastructure en ligne</h1>"
-        "<p>Nginx (TLS) &rarr; Flask &rarr; MariaDB / Redis</p>"
-        "</body></html>"
-    )
+    # Plan §9 : anonyme → connexion. (La redirection vers /documents arrivera en semaine 3.)
+    if g.user is None:
+        return redirect(url_for("auth.login"))
+    return render_template("home.html")
 
 
 @bp.get("/health")

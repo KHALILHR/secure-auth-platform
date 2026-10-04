@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Accès refusé — SecureAuth{% endblock %}
 {% block content %}
-<div class="error-page">
-  <h1>403</h1>
-  <p>Votre compte n'a pas le rôle nécessaire pour accéder à cette page.</p>
+<div class="card error-page">
+  <p class="code">403</p>
+  <h1>Accès refusé</h1>
+  <p class="muted">Votre compte n'a pas le rôle nécessaire pour accéder à cette page. Cette tentative est journalisée.</p>
+  <p><a href="{{ url_for('core.index') }}">Retour au tableau de bord</a></p>
 </div>
 {% endblock %}

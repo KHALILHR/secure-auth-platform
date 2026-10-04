@@ -12,10 +12,26 @@ os.environ["HMAC_KEY"] = base64.b64encode(b"H" * 32).decode()
 
 import fakeredis  # noqa: E402
 import pytest  # noqa: E402
+from flask.testing import FlaskClient  # noqa: E402
 
 from secureauth import create_app  # noqa: E402
 from secureauth.extensions import db  # noqa: E402
 from secureauth.security.audit import ensure_chain_head  # noqa: E402
+
+
+class IsolatedClient(FlaskClient):
+    """Chaque requête de test reçoit son propre contexte d'application, comme en production.
+
+    Sans cela, Flask réutilise le contexte ouvert par la fixture `app` : l'objet
+    `g` (et la session SQLAlchemy) seraient partagés entre requêtes. Flask-WTF met
+    le jeton CSRF en cache dans `g` : après une régénération de session, il ne le
+    réécrirait plus en session et les tests échoueraient pour une raison qui
+    n'existe pas en production.
+    """
+
+    def open(self, *args, **kwargs):
+        with self.application.app_context():
+            return super().open(*args, **kwargs)
 
 
 @pytest.fixture
@@ -27,6 +43,7 @@ def app():
             "SQLALCHEMY_ENGINE_OPTIONS": {},  # pool_recycle / pre_ping inutiles en mémoire
         }
     )
+    app.test_client_class = IsolatedClient
     with app.app_context():
         db.create_all()
         ensure_chain_head()  # comme `flask init-db`

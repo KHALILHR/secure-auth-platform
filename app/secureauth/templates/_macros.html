@@ -1,0 +1,8 @@
+{# Affiche un champ de formulaire avec son libellé et ses erreurs de validation. #}
+{% macro field(f, autocomplete="") %}
+  <label for="{{ f.id }}">{{ f.label.text }}</label>
+  {{ f(autocomplete=autocomplete) if autocomplete else f() }}
+  {% for error in f.errors %}
+    <span class="field-error">{{ error }}</span>
+  {% endfor %}
+{% endmacro %}

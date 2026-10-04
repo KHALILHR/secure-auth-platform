@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Sceau SecureAuth">
+  <defs>
+    <path id="ring" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3c35a"/>
+      <stop offset="1" stop-color="#a8841f"/>
+    </linearGradient>
+  </defs>
+  <!-- anneaux extérieurs -->
+  <circle cx="100" cy="100" r="97" fill="#0b1120" stroke="url(#gold)" stroke-width="4"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="60" fill="#111a2e" stroke="url(#gold)" stroke-width="2"/>
+  <!-- texte circulaire -->
+  <text font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="3.2" fill="#e3c35a">
+    <textPath href="#ring" startOffset="0">SECUREAUTH • SYSTÈME DE DOCUMENTS CLASSIFIÉS •</textPath>
+  </text>
+  <!-- bouclier -->
+  <path d="M100 58 L132 70 V98 C132 120 118 134 100 142 C82 134 68 120 68 98 V70 Z"
+        fill="#16213a" stroke="url(#gold)" stroke-width="2.5"/>
+  <!-- cadenas -->
+  <path d="M90 96 V88 a10 10 0 0 1 20 0 V96" fill="none" stroke="#e3c35a" stroke-width="4" stroke-linecap="round"/>
+  <rect x="84" y="96" width="32" height="26" rx="4" fill="url(#gold)"/>
+  <circle cx="100" cy="106" r="3.6" fill="#0b1120"/>
+  <rect x="98.4" y="107" width="3.2" height="8" rx="1.2" fill="#0b1120"/>
+  <!-- étoiles -->
+  <g fill="#e3c35a">
+    <circle cx="44" cy="100" r="2.4"/>
+    <circle cx="156" cy="100" r="2.4"/>
+  </g>
+</svg>
