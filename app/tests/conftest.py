@@ -15,6 +15,7 @@ import pytest  # noqa: E402
 
 from secureauth import create_app  # noqa: E402
 from secureauth.extensions import db  # noqa: E402
+from secureauth.security.audit import ensure_chain_head  # noqa: E402
 
 
 @pytest.fixture
@@ -28,6 +29,7 @@ def app():
     )
     with app.app_context():
         db.create_all()
+        ensure_chain_head()  # comme `flask init-db`
         yield app
         db.session.remove()
         db.drop_all()

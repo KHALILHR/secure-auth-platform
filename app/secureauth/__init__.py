@@ -20,9 +20,10 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     csrf.init_app(app)
 
     from . import models  # noqa: F401  (enregistre les tables)
-    from .cli import init_db_command
+    from .cli import init_db_command, verify_audit_command
     from .routes import bp as core_bp
 
     app.register_blueprint(core_bp)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(verify_audit_command)
     return app
