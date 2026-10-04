@@ -1,0 +1,111 @@
+/* Aucun style inline nulle part : la CSP (nginx.conf) interdit "unsafe-inline". */
+
+:root {
+  --color-bg: #0f1419;
+  --color-surface: #1a2029;
+  --color-border: #2c3542;
+  --color-text: #e6e9ec;
+  --color-muted: #8a93a1;
+  --color-accent: #4f8cff;
+
+  /* Un niveau de classification = une couleur reconnaissable au premier coup d'œil */
+  --level-0: #3a7d44;   /* PUBLIC */
+  --level-1: #2f6fa8;   /* CONFIDENTIEL */
+  --level-2: #b8860b;   /* SECRET */
+  --level-3: #a83232;   /* TRÈS SECRET */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topbar a { color: var(--color-text); text-decoration: none; font-weight: 600; }
+.topbar nav { display: flex; align-items: center; gap: 1rem; }
+
+/* Formulaire de déconnexion dans la barre : remplace l'ancien style inline */
+.inline-form { display: inline; max-width: none; }
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.flash {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+}
+.flash-error { border-color: var(--level-3); color: #ffb4b4; }
+.flash-success { border-color: var(--level-0); color: #b7e4b0; }
+
+/* Bandeau de classification : affiché sur chaque carte de document */
+.badge-classification {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge-classification.level-0 { background: var(--level-0); }
+.badge-classification.level-1 { background: var(--level-1); }
+.badge-classification.level-2 { background: var(--level-2); }
+.badge-classification.level-3 { background: var(--level-3); }
+
+form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 420px; }
+
+label { font-size: 0.85rem; color: var(--color-muted); }
+
+input, select, textarea {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  font-size: 1rem;
+}
+
+button {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  width: fit-content;
+}
+button:hover { opacity: 0.9; }
+
+.error-page {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+.error-page h1 { font-size: 3rem; margin-bottom: 0.5rem; }
