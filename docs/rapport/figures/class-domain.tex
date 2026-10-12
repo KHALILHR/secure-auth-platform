@@ -1,0 +1,62 @@
+\begin{tikzpicture}[uml, cls/.append style={text width=3.9cm}, clsenum/.append style={text width=3.1cm}]
+  % ----- rangée 1 -----
+  \umlclass[anchor=north west, at={(0,0)}, text width=4.8cm]{user}{cls}{\textbf{User}\\{\tiny«table users»}}
+    {+ id : int «PK»\\+ username : str(32) «unique»\\+ email : str(255) «unique»\\+ password\_hash : str(255)\\+ role : UserRole\\+ clearance\_level : 0..3\\+ is\_active : bool\\+ failed\_attempts : int\\+ locked\_until : datetime?\\+ created\_at : datetime\\+ last\_login\_at : datetime?\\+ password\_changed\_at : datetime}
+    {+ is\_locked() : bool}
+
+  \umlclass[anchor=north west, at={(6.9,0)}]{doc}{cls}{\textbf{SecureDocument}\\{\tiny«table secure\_documents»}}
+    {+ id : int «PK»\\+ public\_id : UUID4 «unique»\\+ reference : str(32) «unique»\\+ classification : 0..3\\+ owner\_id : int «FK»\\+ nonce : bytes(12)\\+ ciphertext : bytes\\+ created\_at : datetime\\+ updated\_at : datetime}
+    {{\tiny\itshape titre + contenu chiffrés ensemble}}
+
+  \umlclass[anchor=north west, at={(12.8,0)}]{acc}{cls}{\textbf{DocumentAccess}\\{\tiny«table document\_access»}}
+    {+ id : int «PK»\\+ document\_id : int «FK»\\+ user\_id : int «FK»\\+ granted\_by : int «FK»\\+ granted\_at : datetime}
+    {{\tiny\itshape (document\_id, user\_id) unique}}
+
+  % ----- rangée 2 -----
+  \umlclass[anchor=north west, at={(0,-7.4)}]{log}{cls}{\textbf{AuditLog}\\{\tiny«table audit\_logs»}}
+    {+ id : int «PK»\\+ created\_at : datetime(6)\\+ actor\_id : int? «FK»\\+ event : str(64)\\+ outcome : AuditOutcome\\+ target\_type : str(32)?\\+ target\_id : str(36)?\\+ ip\_address : str(45)?\\+ details : str(500)?\\+ prev\_tag : hex(64)\\+ integrity\_tag : hex(64)}
+    {{\tiny\itshape jamais modifié après insertion}}
+
+  \umlclass[anchor=north west, at={(6.9,-7.4)}]{head}{cls}{\textbf{AuditChainHead}\\{\tiny«table audit\_chain\_head»}}
+    {+ id : int «PK» (= 1)\\+ last\_log\_id : int\\+ last\_tag : hex(64)}
+    {{\tiny\itshape une seule ligne}}
+
+  % ----- énumérations -----
+  \umlenum[anchor=north west, at={(0.3,-13.6)}]{erole}{\textbf{UserRole}\\{\tiny«enumeration»}}{user\\admin}
+  \umlenum[anchor=north west, at={(4.7,-13.6)}]{eclass}{\textbf{Classification}\\{\tiny«enumeration»}}{0 = PUBLIC\\1 = CONFIDENTIEL\\2 = SECRET\\3 = TRÈS SECRET}
+  \umlenum[anchor=north west, at={(9.1,-13.6)}]{eout}{\textbf{AuditOutcome}\\{\tiny«enumeration»}}{SUCCESS\\DENIED\\FAILURE}
+
+  % ----- User -- SecureDocument : possède -----
+  \draw[thick] (user.east |- doc.west) -- (doc.west);
+  \node[mult, above, anchor=south west] at ($(user.east |- doc.west)+(0.03,0)$) {1};
+  \node[mult, above, anchor=south east] at ($(doc.west)+(-0.03,0)$) {0..*};
+  \node[mult, below] at ($(user.east |- doc.west)!0.5!(doc.west)$) {possède};
+
+  % ----- SecureDocument <>-- DocumentAccess : composition -----
+  \draw[thick, {Diamond[fill=black, length=3mm, width=2.2mm]}-] (doc.east) -- (doc.east -| acc.west);
+  \node[mult, above, anchor=south east] at ($(doc.east -| acc.west)+(-0.03,0)$) {0..*};
+  \node[mult, below] at ($(doc.east)!0.5!(doc.east -| acc.west)$) {liste d'accès};
+
+  % ----- User -- DocumentAccess : deux rôles distincts -----
+  \coordinate (r1) at ($(user.south)+(0.9,-0.55)$);
+  \coordinate (r2) at ($(user.south)+(1.5,-1.1)$);
+  \coordinate (a1) at ($(acc.south)+(-0.8,0)$);
+  \coordinate (a2) at ($(acc.south)+(0.8,0)$);
+  \draw[thick] ($(user.south)+(0.9,0)$) -- (r1) -| (a1);
+  \draw[thick] ($(user.south)+(1.5,0)$) -- (r2) -| (a2);
+  \node[mult, above, anchor=south west] at ($(r1)+(0.55,0)$) {user\_id : l'agent autorisé};
+  \node[mult, above, anchor=south west] at ($(r2)+(0.55,0)$) {granted\_by : qui a accordé l'accès};
+  \node[mult, anchor=north west] at ($(user.south)+(0.93,-0.03)$) {1};
+  \node[mult, anchor=north west] at ($(user.south)+(1.53,-0.03)$) {1};
+  \node[mult, anchor=north west] at ($(a1)+(0.03,-0.02)$) {0..*};
+  \node[mult, anchor=north west] at ($(a2)+(0.03,-0.02)$) {0..*};
+
+  % ----- User -- AuditLog : acteur -----
+  \draw[thick] (user.south) -- (log.north);
+  \node[mult, anchor=north west] at ($(user.south)+(0.05,-0.05)$) {0..1};
+  \node[mult, anchor=south west] at ($(log.north)+(0.05,0.05)$) {0..*};
+  \node[mult, anchor=east] at ($(user.south)!0.5!(log.north)+(-0.12,0)$) {acteur (actor\_id)};
+
+  % ----- référence logique (sans clé étrangère) -----
+  \draw[->, dashed, thick, draw=umlgrey] (head.west) -- node[mult, above, pos=0.5] {dernière ligne} (head.west -| log.east);
+\end{tikzpicture}

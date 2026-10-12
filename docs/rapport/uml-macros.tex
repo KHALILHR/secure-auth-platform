@@ -1,0 +1,132 @@
+% ============================================================
+% Petites macros TikZ pour dessiner les diagrammes UML du rapport
+% (acteurs, classes, séquence) sans aucun outil externe.
+% ============================================================
+
+\definecolor{umlgrey}{gray}{0.55}
+\definecolor{umlfill}{gray}{0.93}
+
+\tikzset{
+  >=Stealth,
+  uml/.style={font=\footnotesize\sffamily},
+  % ---------- cas d'utilisation ----------
+  uc/.style={ellipse, draw=black, fill=white, align=center, font=\scriptsize\sffamily,
+             minimum height=0.95cm, text width=2.9cm, inner sep=1pt},
+  ucint/.style={uc, fill=umlfill},
+  assoc/.style={draw=black},
+  incl/.style={draw=black, dashed, -{Stealth[length=2mm]}},
+  gener/.style={draw=black, -{Triangle[open, length=3mm, width=3mm]}},
+  rellabel/.style={font=\fontsize{6}{7}\selectfont\sffamily, fill=white, inner sep=1pt, sloped},
+  % ---------- classes ----------
+  cls/.style={rectangle split, rectangle split parts=3, draw=black, fill=white,
+              rectangle split part align={center,left,left}, font=\scriptsize\sffamily,
+              inner xsep=5pt, inner ysep=3pt, text width=3.7cm},
+  clsenum/.style={cls, rectangle split parts=2, rectangle split part align={center,left}, fill=umlfill},
+  mult/.style={font=\fontsize{6}{7}\selectfont\sffamily, inner sep=1.5pt},
+  % ---------- séquences ----------
+  lifebox/.style={draw=black, fill=white, align=center,
+                  font=\scriptsize\sffamily, inner sep=3pt, minimum height=0.7cm, text width=2.5cm},
+  lifeline/.style={draw=black!60, dashed, thin},
+  msg/.style={-{Stealth[length=2mm]}, draw=black},
+  retmsg/.style={-{Stealth[length=2mm, open]}, dashed, draw=black},
+  msgl/.style={above, font=\scriptsize\sffamily, align=center, inner sep=1pt, fill=white, fill opacity=0.85, text opacity=1},
+  fragbox/.style={draw=black!60},
+  fragtab/.style={draw=black!60, fill=white, font=\scriptsize\sffamily, inner sep=2pt, anchor=north west},
+  fragcond/.style={font=\scriptsize\sffamily, anchor=west},
+}
+
+% ---------- acteur (bonhomme) : \actor{nom}{x,y}{libellé} ----------
+\newcommand{\actor}[3]{%
+  \begin{scope}[shift={(#2)}]
+    \draw (0,0.62) circle (0.17);
+    \draw (0,0.45)--(0,-0.05);
+    \draw (-0.3,0.3)--(0.3,0.3);
+    \draw (0,-0.05)--(-0.22,-0.5);
+    \draw (0,-0.05)--(0.22,-0.5);
+  \end{scope}
+  \node[inner sep=0, minimum width=0.7cm, minimum height=1.1cm] (#1) at ($(#2)+(0,0.05)$) {};
+  \node[font=\scriptsize\sffamily\bfseries, align=center, below=0.5cm of #1, text width=2.4cm] {#3};
+}
+
+% ---------- séquences ----------
+% Les lignes de vie sont désignées par un identifiant ; \lx{id} donne leur abscisse (en cm).
+\newcommand{\lx}[1]{\csname lx@#1\endcsname}
+\newcommand{\seqbegin}{\def\cury{-0.35}\gdef\lifelist{}\def\seqk{0.85}}
+\newcommand{\life}[3]{%
+  \expandafter\gdef\csname lx@#1\endcsname{#2}%
+  \node[lifebox] at (#2,0) {#3};
+  \ifx\lifelist\empty\xdef\lifelist{#2}\else\xdef\lifelist{\lifelist,#2}\fi
+}
+\newcommand{\seqend}{%
+  \pgfmathsetmacro{\yend}{\cury-0.5}%
+  \begin{scope}[on background layer]
+    \foreach \lfx in \lifelist {\draw[lifeline] (\lfx,-0.35)--(\lfx,\yend);}
+  \end{scope}
+}
+% message : \msg[pas]{de}{vers}{libellé}   (\ret : retour en pointillé)
+\newcommand{\msg}[4][0.8]{%
+  \pgfmathsetmacro{\cury}{\cury-#1*\seqk}%
+  \pgfmathsetmacro{\mxa}{\lx{#2}}\pgfmathsetmacro{\mxb}{\lx{#3}}%
+  \draw[msg] (\mxa,\cury)--(\mxb,\cury) node[msgl, pos=0.5] {#4};%
+}
+\newcommand{\ret}[4][0.8]{%
+  \pgfmathsetmacro{\cury}{\cury-#1*\seqk}%
+  \pgfmathsetmacro{\mxa}{\lx{#2}}\pgfmathsetmacro{\mxb}{\lx{#3}}%
+  \draw[retmsg] (\mxa,\cury)--(\mxb,\cury) node[msgl, pos=0.5] {#4};%
+}
+% message sur soi-même : \selfmsg[pas]{ligne}{libellé}
+\newcommand{\selfmsg}[3][0.8]{%
+  \pgfmathsetmacro{\cury}{\cury-#1*\seqk}%
+  \pgfmathsetmacro{\sx}{\lx{#2}}%
+  \pgfmathsetmacro{\ya}{\cury-0.38}%
+  \pgfmathsetmacro{\xb}{\sx+0.55}%
+  \pgfmathsetmacro{\xc}{\sx+0.6}%
+  \pgfmathsetmacro{\ym}{\cury-0.19}%
+  \draw[msg] (\sx,\cury)--(\xb,\cury)--(\xb,\ya)--(\sx,\ya);%
+  \node[font=\scriptsize\sffamily, anchor=west, align=left, inner sep=1.5pt, fill=white, fill opacity=0.85, text opacity=1] at (\xc,\ym) {#3};%
+  \pgfmathsetmacro{\cury}{\cury-0.38}%
+}
+% fragment combiné : \fragbegin[marge]{id}{type}{ligne gauche}{ligne droite}{condition}
+%                    \fragelse{id}{condition}   \fragend{id}
+\newcommand{\fragbegin}[6][0.7]{%
+  \pgfmathsetmacro{\cury}{\cury-0.3}%
+  \pgfmathsetmacro{\fxl}{\lx{#4}-#1}\pgfmathsetmacro{\fxr}{\lx{#5}+#1}%
+  \expandafter\xdef\csname fy@#2\endcsname{\cury}%
+  \expandafter\xdef\csname fx1@#2\endcsname{\fxl}%
+  \expandafter\xdef\csname fx2@#2\endcsname{\fxr}%
+  \node[fragtab] (tab#2) at (\fxl,\cury) {#3};%
+  \node[fragcond] at ($(tab#2.east)+(0.1,0)$) {#6};%
+  \pgfmathsetmacro{\cury}{\cury-0.3}%
+}
+\newcommand{\fragelse}[2]{%
+  \pgfmathsetmacro{\cury}{\cury-0.4}%
+  \expandafter\let\expandafter\fxa\csname fx1@#1\endcsname
+  \expandafter\let\expandafter\fxb\csname fx2@#1\endcsname
+  \draw[fragbox, dashed] (\fxa,\cury)--(\fxb,\cury);%
+  \pgfmathsetmacro{\xe}{\fxa+0.1}%
+  \pgfmathsetmacro{\ye}{\cury-0.2}%
+  \node[fragcond] at (\xe,\ye) {#2};%
+  \pgfmathsetmacro{\cury}{\cury-0.25}%
+}
+\newcommand{\fragend}[1]{%
+  \pgfmathsetmacro{\yfe}{\cury-0.3}%
+  \expandafter\let\expandafter\fxa\csname fx1@#1\endcsname
+  \expandafter\let\expandafter\fxb\csname fx2@#1\endcsname
+  \expandafter\let\expandafter\fya\csname fy@#1\endcsname
+  \draw[fragbox] (\fxa,\fya) rectangle (\fxb,\yfe);%
+  \pgfmathsetmacro{\cury}{\cury-0.15}%
+}
+
+% ---------- classes : \umlclass[options]{nom}{style}{titre}{attributs}{méthodes} ----------
+\newcommand{\umlclass}[6][]{%
+  \node[#3, #1] (#2) {#4\nodepart{second}#5\nodepart{third}#6};%
+}
+\newcommand{\umlenum}[4][]{%
+  \node[clsenum, #1] (#2) {#3\nodepart{second}#4};%
+}
+
+% Figure UML mise à l'échelle de la largeur de ligne
+\newcommand{\umlfig}[2][0.62]{%
+  \begingroup\hyphenpenalty=10000 \exhyphenpenalty=10000
+  \noindent\adjustbox{max width=\linewidth, max totalheight=#1\textheight, center}{\input{#2}}%
+  \endgroup}

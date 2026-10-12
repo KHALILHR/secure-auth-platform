@@ -1,0 +1,58 @@
+\begin{tikzpicture}[uml]
+  % frontière du système
+  \draw (3.0,-5.6) rectangle (12.4,11.2);
+  \node[font=\scriptsize\sffamily\bfseries, anchor=north west] at (3.1,11.15) {SecureAuth};
+
+  % acteurs
+  \actor{visiteur}{0.8,9.3}{Visiteur}
+  \actor{connecte}{0.8,5.6}{Utilisateur connecté}
+  \actor{agent}{0.8,1.5}{Agent}
+  \actor{admin}{0.8,-3.0}{Administrateur}
+  \draw[gener] ($(agent)+(0,0.7)$) -- ($(connecte)+(0,-1.55)$);
+  \draw[gener] (admin.west) -- ++(-0.6,0) |- (connecte.west);
+
+  % cas d'utilisation (colonne de gauche)
+  \node[uc] (c1) at (5.2,10.2) {S'inscrire};
+  \node[uc] (c2) at (5.2,8.7)  {Se connecter};
+  \node[uc] (c3) at (5.2,7.2)  {Se déconnecter};
+  \node[uc] (c4) at (5.2,5.7)  {Changer son mot de passe};
+  \node[uc] (c5) at (5.2,4.2)  {Lister les documents lisibles};
+  \node[uc] (c6) at (5.2,2.7)  {Créer un document};
+  \node[uc] (c7) at (5.2,1.2)  {Lire un document};
+  \node[uc] (c8) at (5.2,-0.3) {Partager un document};
+  \node[uc] (c9) at (5.2,-1.8) {Gérer les comptes et les habilitations};
+  \node[uc] (c10) at (5.2,-3.3) {Consulter le journal d'audit};
+  \node[uc] (c11) at (5.2,-4.8) {Vérifier l'intégrité du journal};
+
+  % cas internes (colonne de droite)
+  \node[ucint] (x1) at (10.0,9.6)  {Verrouiller le compte après 5 échecs};
+  \node[ucint] (x2) at (10.0,7.6)  {Valider la politique de mot de passe};
+  \node[ucint] (x3) at (10.0,3.4)  {Chiffrer / déchiffrer le document};
+  \node[ucint] (x4) at (10.0,0.8)  {Vérifier les droits d'accès};
+  \node[ucint] (x5) at (10.0,-3.3) {Journaliser l'événement (HMAC)};
+
+  % associations
+  \draw[assoc] (visiteur) -- (c1);
+  \draw[assoc] (visiteur) -- (c2);
+  \draw[assoc] (connecte) -- (c3);
+  \draw[assoc] (connecte) -- (c4);
+  \draw[assoc] (agent) -- (c5);
+  \draw[assoc] (agent) -- (c6);
+  \draw[assoc] (agent) -- (c7);
+  \draw[assoc] (agent) -- (c8);
+  \draw[assoc] (admin) -- (c9);
+  \draw[assoc] (admin) -- (c10);
+  \draw[assoc] (admin) -- (c11);
+
+  % relations include / extend
+  \draw[incl] (x1) -- node[rellabel, above] {«extend»} (c2);
+  \draw[incl] (c1) -- node[rellabel, above, pos=0.55] {«include»} (x2);
+  \draw[incl] (c4) -- (x2);
+  \draw[incl] (c6) -- node[rellabel, above, pos=0.5] {«include»} (x3);
+  \draw[incl] (c7) -- (x3);
+  \draw[incl] (c6) -- (x4);
+  \draw[incl] (c7) -- node[rellabel, above, pos=0.5] {«include»} (x4);
+  \draw[incl] (c8) -- (x4);
+  \draw[incl] (c9) -- node[rellabel, below, pos=0.55] {«include»} (x5);
+  \draw[incl] (c11) -- (x5);
+\end{tikzpicture}

@@ -1,0 +1,30 @@
+T01 & Compte inexistant vs mauvais mot de passe & Même message, durée comparable & Conforme \\
+T02 & 6 échecs consécutifs puis le bon mot de passe & Compte verrouillé 15 min, même message & Conforme \\
+T03 & Injection SQL dans le formulaire (et les autres entrées) & Échec normal, aucune erreur SQL & Conforme \\
+T04 & Drapeaux du cookie de session & Secure, HttpOnly, SameSite=Lax, préfixe \_\allowbreak{}\_\allowbreak{}Host- & Conforme \\
+T05 & Identifiant avant / après connexion & Identifiant différent & Conforme \\
+T06 & Rejouer un cookie après déconnexion & Redirection vers la connexion & Conforme \\
+T07 & Inactivité supérieure à 30 minutes & Session expirée & Partiel \\
+T08 & POST sans jeton & HTTP 400 & Conforme \\
+T09 & Agent SECRET vers un document TRÈS SECRET & 404 + DOC\_\allowbreak{}ACCESS\_\allowbreak{}DENIED & Conforme \\
+T10 & Habilitation suffisante mais hors liste d'accès & 404 & Conforme \\
+T11 & IDOR : identifiant d'un autre document & 404 identique à un document inexistant & Conforme \\
+T12 & L'administrateur tente de lire un document & 404 & Conforme \\
+T13 & L'administrateur s'attribue un accès ou modifie sa propre habilitation & Refus + ADMIN\_\allowbreak{}SELF\_\allowbreak{}MODIFY\_\allowbreak{}DENIED & Conforme \\
+T14 & Un agent appelle une route /admin/* & 403 & Conforme \\
+T15 & Habilitation abaissée après attribution & Accès perdu immédiatement & Conforme \\
+T16 & Création au-dessus de son habilitation (champ modifié) & Refus & Conforme \\
+T17 & Classification modifiée directement en base & Déchiffrement impossible + INTEGRITY\_\allowbreak{}FAILURE & Conforme \\
+T18 & Lecture des documents directement en base & Uniquement du binaire illisible & Conforme \\
+T19 & Ligne du journal modifiée en base & Ligne signalée & Conforme \\
+T20 & Ligne du journal supprimée (milieu ou fin) & Rupture détectée & Conforme \\
+T21 & Balise de script dans un titre de document & Affichée comme texte, bloquée par la CSP & Conforme \\
+T22 & Connexion en TLS 1.1 & Refusée & Conforme \\
+T23 & En-têtes de sécurité & Tous présents & Conforme \\
+T24 & Accès direct aux ports 3306 et 6379 & Injoignables depuis l'hôte & Conforme \\
+T25 & Rafale de connexions & HTTP 429 après le seuil & Conforme \\
+T26 & L'administrateur ajoute un agent ; l'agent ouvre le formulaire ; première connexion & Agent refusé (403) ; compte créé avec mot de passe provisoire ; changement imposé ; USER\_\allowbreak{}CREATE sans mot de passe & Conforme \\
+T27 & Dépôt d'un PDF de 3 Mo puis lecture directe de la colonne en base & Binaire illisible, ni contenu ni nom en clair ; téléchargement identique en pièce jointe & Conforme \\
+T28 & Téléchargement hors liste d'accès, après partage, puis classification modifiée en base & 404 + DOC\_\allowbreak{}ACCESS\_\allowbreak{}DENIED ; 200 après partage ; 500 + INTEGRITY\_\allowbreak{}FAILURE après falsification & Conforme \\
+T29 & Faux PDF, exécutable, page HTML, fichier de 11 Mo, corps de 3 Mo sur une autre page & 400 pour les fichiers invalides, 413 pour les envois trop gros, rien d'enregistré & Conforme \\
+T30 & L'administrateur dépose un document TRÈS SECRET puis tente de le lire & Dépôt accepté, redirection vers le partage, lecture et téléchargement refusés (404), partage seulement aux agents habilités & Conforme \\

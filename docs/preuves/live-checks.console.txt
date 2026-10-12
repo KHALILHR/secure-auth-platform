@@ -1,0 +1,57 @@
+Attente de 65 s : une exécution précédente a pu épuiser le quota de connexions (10/min).
+[OK] T04 drapeaux du cookie de session -> attendu : __Host-, Secure, HttpOnly, SameSite=Lax, sans Domain ; obtenu : Expires=Sun, 11 Oct 2026 23:33:59 GMT; Secure; HttpOnly; Path=/; SameS
+[OK] T07 expiration du cookie -> attendu : environ 30 min ; obtenu : Sun, 11 Oct 2026 23:33:59 GMT
+[OK] T23 en-têtes de sécurité (curl -I) -> attendu : tous présents ; obtenu : tous présents
+[OK] T23 version de Nginx masquée -> attendu : server: nginx sans numéro ; obtenu : nginx
+[OK] T22 connexion TLS 1.2 puis TLS 1.3 -> attendu : acceptées ; obtenu : TLSv1.2 / TLSv1.3
+[OK] T22 openssl s_client -tls1_1 -> attendu : refusée ; obtenu : refusée (alert protocol version)
+[OK] T23 redirection HTTP vers HTTPS -> attendu : 301 vers https:// ; obtenu : 301 https://localhost/auth/login
+[OK] T24 port 3306 de MariaDB publié sur l'hôte par Docker ? -> attendu : aucun port publié ; obtenu : ports publiés : [] ; localhost:3306 répond (autre service de la machine, pas le conteneur)
+[OK] T24 port 6379 de Redis publié sur l'hôte par Docker ? -> attendu : aucun port publié ; obtenu : ports publiés : [] ; localhost:6379 refuse la connexion
+[OK] T24 ports publiés par docker compose ps (nginx) -> attendu : 80 et 443 uniquement ; obtenu : [80, 443]
+[OK] T01 compte inconnu vs mauvais mot de passe -> attendu : même message, durée comparable ; obtenu : même message=True, médianes 97 ms / 83 ms
+   ... pause de 61s pour respecter la limitation de débit
+[OK] T03 injection SQL dans le formulaire -> attendu : échec normal, aucune erreur SQL ; obtenu : 200, message générique=True
+[OK] T08 POST de connexion sans jeton CSRF -> attendu : HTTP 400 ; obtenu : 400
+[OK] T05 identifiant de session avant / après connexion -> attendu : différent ; obtenu : 6YOsOgTy… -> RQa7rzX4…
+[OK] T06 rejeu du cookie après déconnexion -> attendu : redirection vers la connexion ; obtenu : 302 /auth/login?next=/documents/
+[OK] T09 bob (SECRET) -> TS-001 (TRÈS SECRET) -> attendu : HTTP 404 ; obtenu : 404
+[OK] T10 alice (habilitée) -> SEC-002 (hors liste d'accès) -> attendu : HTTP 404 ; obtenu : 404
+[OK] T11 IDOR : document interdit / UUID inconnu / identifiant entier -> attendu : 404 identiques ; obtenu : 404 / 404 / 404
+[OK] T12 administrateur -> TS-001 -> attendu : HTTP 404 ; obtenu : 404
+[OK] T13 l'administrateur s'attribue un accès -> attendu : refus + ADMIN_SELF_MODIFY_DENIED ; obtenu : refusé
+[OK] T13 l'administrateur modifie sa propre habilitation -> attendu : refus (habilitation inchangée) ; obtenu : habilitation en base = 0
+[OK] T14 agent -> /admin/users -> attendu : HTTP 403 ; obtenu : 403
+[OK] T15 habilitation de bob abaissée à 1, session déjà ouverte -> attendu : accès perdu immédiatement (404) ; obtenu : 404
+[OK] T16 création au-dessus de l'habilitation (champ modifié) -> attendu : refus (403) ; obtenu : 403
+[OK] T18 lecture directe de la table secure_documents -> attendu : binaire illisible, ni titre ni contenu ; obtenu : nonce+ciphertext = TS-001	C78FA13D28045295BD941039	C402267B13D7D4FB670676CFB1D8…
+[OK] T17 classification de TS-001 passée à 0 directement en base -> attendu : déchiffrement refusé + INTEGRITY_FAILURE ; obtenu : HTTP 500, 3 ligne(s) INTEGRITY_FAILURE
+[OK] T17 après restauration de la classification -> attendu : lecture à nouveau possible ; obtenu : 200
+[OK] T21 balise <script> dans un titre de document -> attendu : affichée comme texte, bloquée par la CSP ; obtenu : échappée (&lt;script&gt;)
+[OK] T19 journal intact avant l'attaque -> attendu : Chaîne intègre ; obtenu : Chaîne intègre
+[OK] T19 ligne 3 du journal modifiée directement en base -> attendu : ligne désignée par la page de vérification ; obtenu : désignée : True
+[OK] T19 après restauration de la ligne -> attendu : Chaîne intègre à nouveau ; obtenu : Chaîne intègre
+[OK] SMOKE 11 pages des espaces documents et administration -> attendu : toutes en HTTP 200 ; obtenu : toutes en 200
+[OK] T26 un agent ouvre le formulaire d'ajout d'utilisateur -> attendu : HTTP 403 ; obtenu : 403
+[OK] T26 l'administrateur ajoute un agent (habilitation SECRET) -> attendu : rôle user, niveau 2, mot de passe provisoire, Argon2id ; obtenu : user / 2 / 1 / $argon2id
+[OK] T26 création journalisée (USER_CREATE) sans le mot de passe -> attendu : 1 ligne ; obtenu : 1 ligne(s)
+[OK] T26 première page demandée avec le mot de passe provisoire -> attendu : redirection vers /auth/password ; obtenu : 302 /auth/password
+[OK] T26 après le changement de mot de passe -> attendu : accès rétabli, indicateur à 0 ; obtenu : HTTP 200, indicateur = 0
+[OK] T27 alice dépose un PDF de 3 Mo classé SECRET -> attendu : HTTP 302 vers la fiche du document ; obtenu : 302 /documents/4df3ab32-08bd-4309-97cc-a66989471b5d
+[OK] T27 lecture directe de la colonne file_ciphertext -> attendu : taille + 16 octets (étiquette GCM), ni contenu ni nom de fichier en clair ; obtenu : taille 3145759, stocké 3145775, marqueur/nom trouvés à : ['0', '0', '0']
+[OK] T27 téléchargement par alice -> attendu : octets identiques, application/pdf, attachment, nosniff, no-store ; obtenu : 200, identique=True, application/pdf, attachment; filename=p, nosniff, no-store
+[OK] T28 bob (SECRET, absent de la liste d'accès) télécharge le fichier -> attendu : HTTP 404 + DOC_ACCESS_DENIED ; obtenu : 404, 1 refus journalisé(s)
+[OK] T28 après partage par le propriétaire -> attendu : bob télécharge les mêmes octets, DOC_DOWNLOAD journalisé ; obtenu : 200, identique=True, 2 téléchargement(s) journalisé(s)
+[OK] T28 classification du document passée à 0 directement en base -> attendu : téléchargement refusé (500) + INTEGRITY_FAILURE ; obtenu : HTTP 500, 1 ligne(s)
+[OK] T29 faux PDF, .exe et .html déposés -> attendu : HTTP 400 pour chacun ; obtenu : {'faux PDF (texte déguisé)': 400, 'exécutable .exe': 400, 'page .html': 400}
+[OK] T29 fichier de 11 Mo, puis corps de 3 Mo sur une autre page -> attendu : refusés par Nginx : seule la page de dépôt dépasse 2 Mo ; obtenu : 11 Mo -> 413 ; 3 Mo ailleurs -> 413
+[OK] T29 documents enregistrés après ces refus -> attendu : aucun de plus ; obtenu : 8 -> 8
+[OK] T30 l'administrateur dépose un document TRÈS SECRET -> attendu : accepté, puis redirigé vers le partage (il ne peut pas le lire) ; obtenu : 302 /documents/87fd9b5e-50db-492a-ac07-a8197a0c54f8/access
+[OK] T30 l'administrateur relit ou télécharge son propre dépôt -> attendu : HTTP 404 (pas de lecture vers le haut) ; obtenu : classification/propriétaire/habilitation = ['3', 'admin', '0'] ; lecture 404, téléchargement 404
+[OK] T30 partage à bob (SECRET) puis à alice (TRÈS SECRET) -> attendu : bob refusé (404), alice télécharge (200) ; obtenu : bob 404, alice 200
+   ... pause de 52s pour respecter la limitation de débit
+[OK] T02 6 échecs consécutifs puis le BON mot de passe -> attendu : compte verrouillé, même message ; obtenu : 200, message générique=True
+[OK] T02 colonne locked_until renseignée -> attendu : 1 ; obtenu : 1
+[OK] T25 rafale de 16 connexions (équivalent Burp Intruder) -> attendu : HTTP 429 après le seuil ; obtenu : codes [200, 200, 200]…[429, 429, 429], premier 429 à la requête n°11
+
+52/52 vérifications conformes -> C:\Users\MSI\secure-auth-platform\docs\preuves\live-checks.txt

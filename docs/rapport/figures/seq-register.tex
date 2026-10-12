@@ -1,0 +1,37 @@
+\begin{tikzpicture}[uml]
+  \seqbegin
+  \life{nav}{0}{Navigateur}
+  \life{rte}{3.7}{Flask\\(auth.routes)}
+  \life{svc}{7.4}{AuthService}
+  \life{pwd}{11.1}{Passwords\\(Argon2id)}
+  \life{db}{14.8}{MariaDB}
+
+  \msg[1.7]{nav}{rte}{POST /auth/register\\username, email, password,\\confirm, csrf\_token}
+  \selfmsg{rte}{valider CSRF et forme des champs}
+
+  \fragbegin[0.5]{f1}{alt}{nav}{db}{[formulaire invalide]}
+  \ret{rte}{nav}{400 ou formulaire + erreurs}
+  \fragelse{f1}{[formulaire valide]}
+  \msg[1.3]{rte}{svc}{register\_user(username,\\email, password)}
+  \msg[1.3]{svc}{pwd}{validate\_password(\\password, username)}
+  \ret{pwd}{svc}{erreurs éventuelles}
+
+  \fragbegin[0.3]{f2}{alt}{svc}{db}{[mot de passe refusé]}
+  \ret{svc}{rte}{(None, erreurs)}
+  \fragelse{f2}{[mot de passe accepté]}
+  \msg{svc}{pwd}{hash\_password(password)}
+  \ret[1.3]{pwd}{svc}{empreinte Argon2id\\(≈ 50 ms)}
+  \msg[1.3]{svc}{db}{SELECT : nom ou e-mail\\déjà utilisé ?}
+  \ret{db}{svc}{résultat}
+
+  \fragbegin[0.15]{f3}{alt}{svc}{db}{[déjà utilisé]}
+  \ret[1.3]{svc}{rte}{(None, message\\générique)}
+  \fragelse{f3}{[libre]}
+  \msg[1.7]{svc}{db}{INSERT users (role = user,\\habilitation 0) puis INSERT\\audit\_logs (REGISTER, HMAC)}
+  \ret{svc}{rte}{(user, [ ])}
+  \ret[1.3]{rte}{nav}{302 vers /auth/login}
+  \fragend{f3}
+  \fragend{f2}
+  \fragend{f1}
+  \seqend
+\end{tikzpicture}
