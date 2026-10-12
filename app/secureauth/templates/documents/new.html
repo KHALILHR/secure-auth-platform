@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Nouveau document — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Espace documents</span>
+<h1>Nouveau document</h1>
+<div class="card form-card">
+  <p class="muted">Le titre et le contenu sont chiffrés (AES-256-GCM) avant d'être enregistrés.
+    {% if g.user.role == "admin" %}En tant qu'administrateur, vous choisissez la classification à tous les niveaux (sans pouvoir lire au-dessus de votre habilitation).
+    {% else %}Vous pouvez classer un document jusqu'à votre propre habilitation :
+    <span class="badge-classification level-{{ g.user.clearance_level }}">{{ classification_labels[g.user.clearance_level] }}</span>{% endif %}</p>
+  <p class="muted">Pour déposer un fichier PDF ou Word, utilisez plutôt <a href="{{ url_for('documents.upload') }}">Déposer un fichier</a>.</p>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {{ field(form.title) }}
+    {{ field(form.classification) }}
+    {{ field(form.content) }}
+    <button type="submit">Chiffrer et enregistrer</button>
+  </form>
+</div>
+{% endblock %}

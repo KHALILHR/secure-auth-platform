@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Documents — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Espace documents</span>
+<div class="page-head">
+  <h1>Mes documents</h1>
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('documents.upload') }}">Déposer un fichier</a>
+    <a class="btn btn-outline" href="{{ url_for('documents.new') }}">Nouveau document texte</a>
+  </div>
+</div>
+
+<div class="card">
+  {% if items %}
+    <table class="data">
+      <thead>
+        <tr><th>Référence</th><th>Classification</th><th>Titre</th><th>Propriétaire</th><th>Créé le</th></tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td class="mono"><a href="{{ url_for('documents.read', public_id=item.doc.public_id) }}">{{ item.doc.reference }}</a></td>
+            <td><span class="badge-classification level-{{ item.doc.classification }}">{{ classification_labels[item.doc.classification] }}</span></td>
+            <td>{% if item.title is none %}<span class="state denied">Intégrité compromise</span>{% else %}{{ item.title }}{% endif %}{% if item.doc.has_file %}<span class="tag-file">fichier</span>{% endif %}</td>
+            <td class="mono">{{ item.doc.owner.username }}</td>
+            <td class="mono">{{ item.doc.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Aucun document lisible avec votre habilitation et vos accès. Créez-en un, ou demandez à un propriétaire de vous l'ouvrir.</p>
+  {% endif %}
+  <p class="muted">Seuls les documents dont la classification ne dépasse pas votre habilitation <em>et</em> qui vous ont été ouverts apparaissent ici.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Déposer un fichier — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Espace documents</span>
+<h1>Déposer un fichier</h1>
+<div class="card form-card">
+  <p class="muted">Formats acceptés : PDF, DOC et DOCX, 8 Mo au maximum. Le fichier et son nom sont chiffrés (AES-256-GCM) avant d'être enregistrés, et ne sont jamais affichés par le navigateur : ils se téléchargent.</p>
+  {% if g.user.role == "admin" %}
+    <p class="muted">En tant qu'administrateur, vous choisissez la classification à tous les niveaux. Votre habilitation reste
+      <span class="badge-classification level-{{ g.user.clearance_level }}">{{ classification_labels[g.user.clearance_level] }}</span> :
+      vous ne pourrez pas lire un document classé au-dessus, seulement le confier à des agents habilités.</p>
+  {% else %}
+    <p class="muted">Vous pouvez classer un document jusqu'à votre propre habilitation :
+      <span class="badge-classification level-{{ g.user.clearance_level }}">{{ classification_labels[g.user.clearance_level] }}</span></p>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+    <label for="{{ form.file.id }}">{{ form.file.label.text }}</label>
+    {{ form.file(accept=accept) }}
+    {% for error in form.file.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    {{ field(form.classification) }}
+    {{ field(form.title) }}
+    {{ field(form.content) }}
+    <button type="submit">Chiffrer et déposer</button>
+  </form>
+  <p><a href="{{ url_for('documents.index') }}">&larr; Retour à la liste</a></p>
+</div>
+{% endblock %}

@@ -23,6 +23,9 @@ def new_public_id() -> str:
 # signée. On stocke donc les microsecondes (DATETIME(6)) pour éviter toute troncature.
 AuditDateTime = db.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql", "mariadb")
 
+# BLOB MariaDB = 64 Ko seulement : un fichier déposé (PDF, DOC, DOCX) demande un LONGBLOB.
+FileBlob = db.LargeBinary().with_variant(mysql.LONGBLOB(), "mysql", "mariadb")
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -44,13 +47,17 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     last_login_at = db.Column(db.DateTime, nullable=True)
     password_changed_at = db.Column(db.DateTime, nullable=False, default=utcnow)
+    # Compte créé par un administrateur : le mot de passe initial est provisoire, l'agent doit le
+    # remplacer avant toute autre action (l'administrateur ne doit pas le connaître durablement).
+    must_change_password = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
 
     def is_locked(self) -> bool:
         return self.locked_until is not None and self.locked_until > utcnow()
 
 
 class SecureDocument(db.Model):
-    """Document classifié : titre et contenu sont chiffrés (AES-256-GCM) dans `ciphertext`."""
+    """Document classifié : titre et contenu sont chiffrés (AES-256-GCM) dans `ciphertext`,
+    et le fichier éventuel dans `file_ciphertext`."""
 
     __tablename__ = "secure_documents"
     __table_args__ = (
@@ -63,12 +70,22 @@ class SecureDocument(db.Model):
     classification = db.Column(db.SmallInteger, nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     nonce = db.Column(db.LargeBinary(12), nullable=False)   # 96 bits, unique à chaque chiffrement
-    ciphertext = db.Column(db.LargeBinary, nullable=False)  # titre + contenu + tag GCM
+    ciphertext = db.Column(db.LargeBinary, nullable=False)  # titre + contenu (+ nom de fichier) + tag GCM
+    # Fichier déposé (PDF, DOC, DOCX) : chiffré à part, avec son propre nonce. NULL pour un document texte.
+    # `file_size` (taille en octets) sert aussi d'indicateur « ce document a un fichier ».
+    file_size = db.Column(db.Integer, nullable=True)
+    file_nonce = db.Column(db.LargeBinary(12), nullable=True)
+    # deferred : le gros blob n'est lu que pour un téléchargement, pas pour afficher une liste
+    file_ciphertext = db.deferred(db.Column(FileBlob, nullable=True))
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     owner = db.relationship("User")
     accesses = db.relationship("DocumentAccess", back_populates="document", cascade="all, delete-orphan")
+
+    @property
+    def has_file(self) -> bool:
+        return self.file_size is not None
 
 
 class DocumentAccess(db.Model):

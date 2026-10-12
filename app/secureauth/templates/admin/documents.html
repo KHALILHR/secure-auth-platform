@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Documents — Administration — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Administration</span>
+<h1>Documents (métadonnées)</h1>
+<p class="muted">Référence, classification et propriétaire uniquement : le titre et le contenu restent illisibles pour l'administrateur.</p>
+
+<div class="card">
+  {% if rows %}
+  <table class="data">
+    <thead><tr><th>Référence</th><th>Classification</th><th>Propriétaire</th><th>Accès</th><th>Créé le</th><th></th></tr></thead>
+    <tbody>
+      {% for doc, owner, access_count in rows %}
+        <tr>
+          <td class="mono">{{ doc.reference }}</td>
+          <td><span class="badge-classification level-{{ doc.classification }}">{{ classification_labels[doc.classification] }}</span></td>
+          <td class="mono">{{ owner.username }}</td>
+          <td>{{ access_count }}</td>
+          <td class="mono">{{ doc.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td><a href="{{ url_for('documents.access', public_id=doc.public_id) }}">Liste d'accès</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Aucun document pour le moment.</p>
+  {% endif %}
+</div>
+{% endblock %}

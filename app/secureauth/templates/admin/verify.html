@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Intégrité du journal — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Administration</span>
+<h1>Intégrité du journal d'audit</h1>
+
+<div class="card form-card">
+  <p class="muted">La vérification recalcule toute la chaîne HMAC-SHA256 : chaque ligne doit porter l'empreinte de la précédente, et la dernière doit correspondre à la tête de chaîne. Une ligne modifiée, supprimée ou déplacée est désignée.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">Lancer la vérification</button>
+  </form>
+</div>
+
+{% if report is not none %}
+  {% if report.ok %}
+    <div class="card verdict verdict-ok">
+      <span class="section-label">Résultat</span>
+      <h2>Chaîne intègre</h2>
+      <p>{{ report.checked }} ligne(s) vérifiée(s) : aucune modification, suppression ni réordonnancement détecté.</p>
+    </div>
+  {% else %}
+    <div class="card verdict verdict-bad">
+      <span class="section-label">Résultat</span>
+      <h2>Chaîne corrompue</h2>
+      <p>Première anomalie{% if report.first_bad_id %} à la ligne <strong class="mono">{{ report.first_bad_id }}</strong>{% endif %} : {{ report.reason }}.</p>
+      <p class="muted">{{ report.checked }} ligne(s) valide(s) avant l'anomalie.</p>
+    </div>
+  {% endif %}
+{% endif %}
+<p><a href="{{ url_for('admin.audit_log') }}">&larr; Retour au journal</a></p>
+{% endblock %}

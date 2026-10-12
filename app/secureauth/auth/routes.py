@@ -1,5 +1,7 @@
 """Routes d'authentification (plan §9) : les décisions sont dans service.py."""
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
+
+from ..extensions import limiter
 
 from ..security.decorators import login_required
 from . import service
@@ -9,6 +11,7 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @bp.route("/register", methods=["GET", "POST"])
+@limiter.limit(lambda: current_app.config["REGISTER_RATE_LIMIT"], methods=["POST"])
 def register():
     if g.user is not None:
         return redirect(url_for("core.index"))
@@ -25,6 +28,7 @@ def register():
 
 
 @bp.route("/login", methods=["GET", "POST"])
+@limiter.limit(lambda: current_app.config["LOGIN_RATE_LIMIT"], methods=["POST"])
 def login():
     if g.user is not None:
         return redirect(url_for("core.index"))
@@ -49,6 +53,7 @@ def logout():
 
 
 @bp.route("/password", methods=["GET", "POST"])
+@limiter.limit(lambda: current_app.config["PASSWORD_RATE_LIMIT"], methods=["POST"])
 @login_required
 def password():
     form = PasswordChangeForm()

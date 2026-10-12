@@ -41,6 +41,8 @@ def app():
             "TESTING": True,
             "SESSION_REDIS": fakeredis.FakeRedis(),
             "SQLALCHEMY_ENGINE_OPTIONS": {},  # pool_recycle / pre_ping inutiles en mémoire
+            "RATELIMIT_ENABLED": False,       # activée seulement par les tests de limitation de débit
+            "RATELIMIT_STORAGE_URI": "memory://",
         }
     )
     app.test_client_class = IsolatedClient

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Administration — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Administration</span>
+<h1>Espace administrateur</h1>
+<p class="muted">Vous gérez les comptes, les habilitations et le journal. Votre rôle ne donne accès à aucun document, et vous ne pouvez pas modifier vos propres droits.</p>
+
+<div class="stats">
+  <div class="card stat"><span class="section-label">Comptes</span><p class="stat-value">{{ stats.users }}</p><span class="muted">dont {{ stats.active }} actifs</span></div>
+  <div class="card stat"><span class="section-label">Documents</span><p class="stat-value">{{ stats.documents }}</p><span class="muted">chiffrés en base</span></div>
+  <div class="card stat"><span class="section-label">Journal</span><p class="stat-value">{{ stats.logs }}</p><span class="muted">lignes signées</span></div>
+</div>
+
+<div class="card">
+  <ul class="link-list">
+    <li><a href="{{ url_for('admin.users') }}">Comptes et habilitations</a></li>
+    <li><a href="{{ url_for('admin.new_user') }}">Ajouter un utilisateur</a></li>
+    <li><a href="{{ url_for('documents.upload') }}">Déposer un document (vous choisissez sa classification)</a></li>
+    <li><a href="{{ url_for('admin.documents') }}">Documents (métadonnées uniquement)</a></li>
+    <li><a href="{{ url_for('admin.audit_log') }}">Journal d'audit</a></li>
+    <li><a href="{{ url_for('admin.verify') }}">Vérifier l'intégrité du journal</a></li>
+  </ul>
+</div>
+{% endblock %}

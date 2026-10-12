@@ -1,4 +1,4 @@
-# SecureAuth — infrastructure (semaine 1)
+# SecureAuth — infrastructure (semaine 1, durcie en semaine 5)
 # Seul Nginx est exposé sur la machine hôte. L'app, MariaDB et Redis restent internes.
 
 services:
@@ -25,8 +25,20 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       HMAC_KEY: ${HMAC_KEY}
+      # Seuils de limitation de débit (valeurs par défaut si .env ne les définit pas)
+      LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-10 per minute}
+      REGISTER_RATE_LIMIT: ${REGISTER_RATE_LIMIT:-10 per hour}
+      PASSWORD_RATE_LIMIT: ${PASSWORD_RATE_LIMIT:-10 per hour}
     expose:
       - "8000"      # visible des autres conteneurs, PAS de la machine hôte
+    # Durcissement : système de fichiers en lecture seule, aucune capacité Linux, pas d'élévation de privilèges
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       db:
         condition: service_healthy

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Fichier trop volumineux — SecureAuth{% endblock %}
+{% block content %}
+<div class="card error-page">
+  <p class="code">413</p>
+  <h1>Envoi trop volumineux</h1>
+  <p class="muted">Le fichier dépasse la taille autorisée (8 Mo pour un document, 2 Mo pour le reste).</p>
+  <p><a href="{{ url_for('documents.index') }}">Retour aux documents</a></p>
+</div>
+{% endblock %}

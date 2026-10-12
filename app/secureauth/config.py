@@ -57,6 +57,15 @@ def load_config() -> dict:
 
         "MAX_CONTENT_LENGTH": 2 * 1024 * 1024,
 
+        # Limitation de débit par IP (Flask-Limiter, compteurs dans Redis). Nginx applique
+        # en plus sa propre limite (nginx.conf) : deux barrières valent mieux qu'une.
+        "RATELIMIT_ENABLED": True,
+        "RATELIMIT_STORAGE_URI": _required("REDIS_URL"),
+        "RATELIMIT_HEADERS_ENABLED": True,
+        "LOGIN_RATE_LIMIT": os.environ.get("LOGIN_RATE_LIMIT", "10 per minute"),
+        "REGISTER_RATE_LIMIT": os.environ.get("REGISTER_RATE_LIMIT", "10 per hour"),
+        "PASSWORD_RATE_LIMIT": os.environ.get("PASSWORD_RATE_LIMIT", "10 per hour"),
+
         # Clés cryptographiques (utilisées en semaine 3), jamais stockées en base
         "ENCRYPTION_KEY": encryption_key,
         "HMAC_KEY": hmac_key,

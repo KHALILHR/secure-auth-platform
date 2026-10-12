@@ -18,7 +18,7 @@ fi
 echo "[1/3] Autorité de certification locale"
 openssl genrsa -out "$PKI_DIR/ca.key" 4096
 openssl req -x509 -new -key "$PKI_DIR/ca.key" -sha256 -days 3650 \
-  -subj "/CN=SecureAuth Local CA" -out "$PKI_DIR/ca.crt"
+  -subj "/CN=SecureAuth Local CA"   -addext "basicConstraints=critical,CA:TRUE" -addext "keyUsage=critical,keyCertSign,cRLSign"   -out "$PKI_DIR/ca.crt"
 
 echo "[2/3] Clé privée + demande de signature (CSR) du serveur"
 openssl genrsa -out "$CERT_DIR/server.key" 2048
@@ -30,6 +30,8 @@ basicConstraints = CA:FALSE
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 subjectAltName = DNS:localhost, IP:127.0.0.1
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid, issuer
 EOF
 openssl x509 -req -in "$PKI_DIR/server.csr" \
   -CA "$PKI_DIR/ca.crt" -CAkey "$PKI_DIR/ca.key" -CAcreateserial \

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Ajouter un utilisateur — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Administration</span>
+<h1>Ajouter un utilisateur</h1>
+<div class="card form-card">
+  <p class="muted">Le compte est créé avec le rôle <em>agent</em> et l'habilitation choisie. Le mot de passe saisi est provisoire :
+    l'agent devra le remplacer dès sa première connexion, avant toute autre action. Un compte administrateur ne se crée pas ici (ligne de commande uniquement).</p>
+  <form method="post" novalidate autocomplete="off">
+    {{ form.hidden_tag() }}
+    {{ field(form.username, "off") }}
+    {{ field(form.email, "off") }}
+    {{ field(form.clearance) }}
+    {{ field(form.password, "new-password") }}
+    {{ field(form.confirm, "new-password") }}
+    <button type="submit">Créer le compte</button>
+  </form>
+  <p><a href="{{ url_for('admin.users') }}">&larr; Retour aux comptes</a></p>
+</div>
+{% endblock %}

@@ -7,3 +7,4 @@ cryptography>=44
 argon2-cffi>=23.1
 redis>=5.0
 gunicorn>=23.0
+Flask-Limiter>=3.8

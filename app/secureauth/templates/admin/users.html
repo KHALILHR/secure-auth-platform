@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Comptes — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Administration</span>
+<div class="page-head">
+  <h1>Comptes et habilitations</h1>
+  <a class="btn" href="{{ url_for('admin.new_user') }}">Ajouter un utilisateur</a>
+</div>
+
+<div class="card">
+  <table class="data">
+    <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Habilitation</th><th>État</th><th>Dernière connexion</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for account in accounts %}
+        <tr>
+          <td class="mono">{{ account.username }}<br><span class="muted">{{ account.email }}</span></td>
+          <td>{{ "Administrateur" if account.role == "admin" else "Agent" }}</td>
+          <td><span class="badge-classification level-{{ account.clearance_level }}">{{ classification_labels[account.clearance_level] }}</span></td>
+          <td>
+            {% if not account.is_active %}<span class="state denied">Désactivé</span>
+            {% elif account.is_locked() %}<span class="state warn">Verrouillé</span>
+            {% else %}<span class="state granted">Actif</span>{% endif %}
+            {% if account.must_change_password %}<br><span class="state warn">Mot de passe provisoire</span>{% endif %}
+          </td>
+          <td class="mono">{{ account.last_login_at.strftime("%Y-%m-%d %H:%M") if account.last_login_at else "jamais" }}</td>
+          <td>
+            {% if account.id == g.user.id %}
+              <span class="muted">Votre compte : non modifiable par vous</span>
+            {% else %}
+              <form method="post" action="{{ url_for('admin.set_clearance', user_id=account.id) }}" class="row-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label class="sr-only" for="level-{{ account.id }}">Habilitation de {{ account.username }}</label>
+                <select name="level" id="level-{{ account.id }}">
+                  {% for level, label in classification_labels.items() %}
+                    <option value="{{ level }}" {% if level == account.clearance_level %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit">Appliquer</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.set_active', user_id=account.id) }}" class="row-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if account.is_active %}
+                  <button type="submit">Désactiver</button>
+                {% else %}
+                  <input type="hidden" name="active" value="y">
+                  <button type="submit">Réactiver</button>
+                {% endif %}
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted">Un changement d'habilitation ou de statut prend effet à la requête suivante de l'agent concerné, même s'il est déjà connecté.</p>
+</div>
+{% endblock %}

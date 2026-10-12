@@ -27,6 +27,8 @@
           {% if g.user.role == "admin" %}<span class="role-tag">Admin</span>{% endif %}
           <span class="badge-classification level-{{ g.user.clearance_level }}">{{ classification_labels[g.user.clearance_level] }}</span>
         </span>
+        <a href="{{ url_for('documents.index') }}">Documents</a>
+        {% if g.user.role == "admin" %}<a href="{{ url_for('admin.index') }}">Administration</a>{% endif %}
         <a href="{{ url_for('auth.password') }}">Mot de passe</a>
         <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

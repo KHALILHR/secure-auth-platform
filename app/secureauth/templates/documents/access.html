@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Accès — {{ doc.reference }} — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Besoin d'en connaître</span>
+<div class="page-head">
+  <h1>Liste d'accès : {{ doc.reference }}</h1>
+  <span class="badge-classification level-{{ doc.classification }}">{{ classification_labels[doc.classification] }}</span>
+</div>
+
+<div class="card">
+  <p class="muted">Propriétaire : <span class="mono">{{ doc.owner.username }}</span>. Seuls les agents listés ci-dessous, et habilités au moins au niveau du document, peuvent le lire.
+    {% if g.user.role == "admin" %}En tant qu'administrateur, vous gérez cette liste mais vous ne voyez ni le titre ni le contenu.{% endif %}</p>
+  <table class="data">
+    <thead><tr><th>Agent</th><th>Habilitation</th><th>Accordé le</th><th>Accordé par</th><th></th></tr></thead>
+    <tbody>
+      {% for entry in entries %}
+        <tr>
+          <td class="mono">{{ entry.user.username }}{% if entry.user_id == doc.owner_id %} <span class="role-tag">Propriétaire</span>{% endif %}</td>
+          <td><span class="badge-classification level-{{ entry.user.clearance_level }}">{{ classification_labels[entry.user.clearance_level] }}</span></td>
+          <td class="mono">{{ entry.granted_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td class="mono">{{ entry.grantor.username }}</td>
+          <td>
+            {% if entry.user_id != doc.owner_id %}
+              <form method="post" action="{{ url_for('documents.revoke', public_id=doc.public_id) }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="user_id" value="{{ entry.user_id }}">
+                <button type="submit">Retirer</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card form-card">
+  <span class="section-label">Ajouter un agent</span>
+  <form method="post" action="{{ url_for('documents.grant', public_id=doc.public_id) }}" novalidate>
+    {{ grant_form.hidden_tag() }}
+    {{ field(grant_form.username) }}
+    <button type="submit">Accorder l'accès</button>
+  </form>
+</div>
+
+<p>
+  {% if g.user.role == "admin" %}<a href="{{ url_for('admin.documents') }}">&larr; Documents (métadonnées)</a>
+  {% else %}<a href="{{ url_for('documents.read', public_id=doc.public_id) }}">&larr; Retour au document</a>{% endif %}
+</p>
+{% endblock %}

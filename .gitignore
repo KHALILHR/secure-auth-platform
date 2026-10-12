@@ -9,3 +9,6 @@ __pycache__/
 .venv/
 .qodo/
 .pytest_cache/
+
+# Rapport LaTeX : fichiers générés
+docs/rapport/build/

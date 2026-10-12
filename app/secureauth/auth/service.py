@@ -4,7 +4,7 @@ Règle d'or : un attaquant ne doit jamais pouvoir distinguer « ce compte
 n'existe pas » de « mauvais mot de passe », ni par le message, ni par le temps
 de réponse.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from flask import current_app, session
 from sqlalchemy import func
@@ -20,6 +20,9 @@ from ..security.passwords import (
     verify_or_dummy,
     verify_password,
 )
+
+MAX_FAILED_ATTEMPTS = 5                  # échecs consécutifs avant verrouillage (EF-06)
+LOCK_DURATION = timedelta(minutes=15)    # durée du verrouillage
 
 REGISTER_REFUSED = "Inscription impossible avec ces informations."
 LOGIN_REFUSED = "Identifiants invalides."
@@ -80,10 +83,25 @@ def authenticate(identifier: str, password: str) -> User | None:
         audit.log_event("LOGIN_FAILURE", "DENIED", actor_id=user.id,
                         target_type="user", target_id=user.id, details="compte désactivé")
         return None
+    if user.is_locked():
+        # Même avec le bon mot de passe : le message reste « Identifiants invalides »
+        audit.log_event("LOGIN_FAILURE", "DENIED", actor_id=user.id,
+                        target_type="user", target_id=user.id, details="compte verrouillé")
+        return None
     if not password_ok:
+        user.failed_attempts += 1
         audit.log_event("LOGIN_FAILURE", "FAILURE", actor_id=user.id,
                         target_type="user", target_id=user.id, details="mot de passe incorrect")
+        if user.failed_attempts >= MAX_FAILED_ATTEMPTS:
+            user.locked_until = utcnow() + LOCK_DURATION
+            user.failed_attempts = 0
+            audit.log_event("LOGIN_LOCKED", "DENIED", actor_id=user.id, target_type="user", target_id=user.id,
+                            details=f"verrouillé {int(LOCK_DURATION.total_seconds() // 60)} min après {MAX_FAILED_ATTEMPTS} échecs")
         return None
+
+    # Succès : on repart de zéro (un verrouillage expiré est aussi levé)
+    user.failed_attempts = 0
+    user.locked_until = None
     return user
 
 
@@ -132,6 +150,7 @@ def change_password(user: User, current: str, new: str) -> list[str]:
 
     user.password_hash = hash_password(new)
     user.password_changed_at = utcnow()
+    user.must_change_password = False  # le mot de passe provisoire donné par l'administrateur n'est plus valable
     _regenerate_session()  # un éventuel cookie volé avant le changement devient inutile
     audit.log_event("PASSWORD_CHANGE", "SUCCESS", actor_id=user.id, target_type="user", target_id=user.id)
     return []

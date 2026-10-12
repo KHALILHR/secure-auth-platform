@@ -352,3 +352,133 @@ button:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px
   .brand-sub { display: none; }
   main { padding: 1.25rem 1rem; }
 }
+
+/* ===== Semaine 3 : documents et administration =============================================== */
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.page-head h1 { margin: 0; }
+
+.btn {
+  display: inline-block;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  color: #111;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+}
+.btn:hover { text-decoration: none; filter: brightness(1.07); }
+
+.form-card { max-width: 720px; }
+textarea { min-height: 14rem; resize: vertical; font-family: var(--mono); font-size: 0.92rem; }
+
+.document-body {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+table.data { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9rem; }
+table.data th {
+  text-align: left;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 0.5rem 0.6rem;
+  white-space: nowrap;
+}
+table.data td { padding: 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.data tr:last-child td { border-bottom: none; }
+table.data.compact { font-size: 0.8rem; }
+table.data.compact td { padding: 0.4rem 0.5rem; }
+
+.state { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; }
+.state.granted { color: var(--success); }
+.state.denied { color: var(--danger); }
+.state.warn { color: var(--level-3); }
+
+.outcome { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.1rem 0.45rem; border-radius: 3px; }
+.outcome-success { color: #bbf7d0; background: rgba(34, 197, 94, 0.15); }
+.outcome-denied { color: #fed7aa; background: rgba(240, 140, 0, 0.18); }
+.outcome-failure { color: #fecaca; background: rgba(239, 68, 68, 0.18); }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.stat { margin-bottom: 0; }
+.stat-value { font-family: var(--mono); font-size: 2.2rem; font-weight: 800; margin: 0; color: var(--gold-light); }
+
+.link-list { list-style: none; margin: 0; padding: 0; }
+.link-list li { padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+.link-list li:last-child { border-bottom: none; }
+
+.row-form { flex-direction: row; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem; }
+.row-form select { width: auto; padding: 0.35rem 0.5rem; font-size: 0.85rem; }
+.row-form button, td .inline-form button { margin: 0; padding: 0.35rem 0.8rem; font-size: 0.7rem; }
+.filter-form { margin-bottom: 1rem; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; margin: -1px; padding: 0; border: 0;
+}
+
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+
+.verdict-ok { border-top-color: var(--success); }
+.verdict-bad { border-top-color: var(--danger); }
+.verdict h2 { margin-bottom: 0.4rem; }
+
+@media (max-width: 860px) {
+  .stats { grid-template-columns: 1fr; }
+  table.data { display: block; overflow-x: auto; }
+}
+
+/* ===== Dépôt de fichiers et création de comptes ================================================= */
+.page-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--gold);
+}
+.btn-outline:hover { background: rgba(201, 162, 39, 0.12); }
+input[type="file"] { padding: 0.5rem 0.6rem; cursor: pointer; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0.2rem 0 0; }
+.file-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.file-card .file-name { font-family: var(--mono); word-break: break-all; }
+.tag-file {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  margin-left: 0.4rem;
+}
+textarea.compact { min-height: 6rem; }

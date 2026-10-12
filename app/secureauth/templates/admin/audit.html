@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Journal d'audit — SecureAuth{% endblock %}
+{% block content %}
+<span class="section-label">Administration</span>
+<div class="page-head">
+  <h1>Journal d'audit</h1>
+  <a class="btn" href="{{ url_for('admin.verify') }}">Vérifier l'intégrité</a>
+</div>
+
+<div class="card">
+  <form method="get" class="row-form filter-form">
+    <label class="sr-only" for="event">Événement</label>
+    <select name="event" id="event">
+      <option value="">Tous les événements</option>
+      {% for ev in events %}<option value="{{ ev }}" {% if ev == selected %}selected{% endif %}>{{ ev }}</option>{% endfor %}
+    </select>
+    <button type="submit">Filtrer</button>
+  </form>
+
+  <table class="data compact">
+    <thead><tr><th>N°</th><th>Date (UTC)</th><th>Acteur</th><th>Événement</th><th>Résultat</th><th>Cible</th><th>IP</th><th>Détails</th></tr></thead>
+    <tbody>
+      {% for row in pagination.items %}
+        <tr>
+          <td class="mono">{{ row.id }}</td>
+          <td class="mono">{{ row.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+          <td class="mono">{{ names.get(row.actor_id, "—") }}</td>
+          <td class="mono">{{ row.event }}</td>
+          <td><span class="outcome outcome-{{ row.outcome|lower }}">{{ row.outcome }}</span></td>
+          <td class="mono">{% if row.target_type %}{{ row.target_type }}{% if row.target_id %}:{{ row.target_id[:8] }}{% endif %}{% else %}—{% endif %}</td>
+          <td class="mono">{{ row.ip_address or "—" }}</td>
+          <td>{{ row.details or "" }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="muted">Aucune ligne.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="pager">
+    {% if pagination.has_prev %}<a href="{{ url_for('admin.audit_log', page=pagination.prev_num, event=selected) }}">&larr; Plus récent</a>{% endif %}
+    <span class="muted">Page {{ pagination.page }} sur {{ pagination.pages or 1 }} · {{ pagination.total }} ligne(s)</span>
+    {% if pagination.has_next %}<a href="{{ url_for('admin.audit_log', page=pagination.next_num, event=selected) }}">Plus ancien &rarr;</a>{% endif %}
+  </div>
+</div>
+{% endblock %}
